@@ -36,8 +36,8 @@
 	   "eval":"content.html(''); btn.unbind('click',adv_text_run); bottom.html(''); var ele=gal_txt['interact']; content.append(ele[0]);  var div=$('#pm'); div.append(ele[1]); div.append(ele[2]); div.append(ele[3]); bottom.append(switch_game_btn); adv_text_run();"},
  "15":{"text":"点击精灵图标，选择一只精灵。火克草，草克水，水克火",
 	   "eval":"var pm_objs=$('.pm_obj');  var select_pm={'name':'未选择'};  for(var i=0, len=pm_objs.length; i<len; i++){var pm_obj=pm_objs.eq(i);  pm_obj.bind('click',function(){var pm_img=this.getAttribute('user_src'); var name=this.getAttribute('name'); var hp=this.getAttribute('hp'); var atk=this.getAttribute('atk'); var def=this.getAttribute('def'); var sp=this.getAttribute('speed'); var attr=this.getAttribute('attr'); var summary=this.getAttribute('summary'); select_pm['src']=pm_img; select_pm['name']=name; select_pm['attr']=attr; select_pm['hp']=hp; select_pm['atk']=atk; select_pm['def']=def; select_pm['sp']=sp; p.fadeOut('fast'); var tem_text=name+'&nbsp;&nbsp;&nbsp;'+'属性:'+attr+'&nbsp;&nbsp;&nbsp;'+summary;  p.html(tem_text);  p.fadeIn('fast');});}  $('#game_btn').bind('click',function(){load_battle(select_pm);});"},
- "16":{"text":"试试动态载入脚本！"},
- "17":{"text":"试试动sdaa态载入脚本！",
+ "16":{"text":"少用eval"},
+ "17":{"text":"eval会影响性能并且难以调试，而且还有安全性问题",
 	   "eval":""}
 }
 
