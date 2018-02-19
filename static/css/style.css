@@ -1,4 +1,4 @@
-#top{
+.top{
 	height: 545px;
 	position: relative;
 	padding: 0 0 0 0;
@@ -8,7 +8,12 @@
   	background: linear-gradient(#333, #000);
 }
 
-
+.top_battle{
+	height: 545px;
+	position: relative;
+	padding: 0 0 0 0;
+	background: #f7f0d8;
+}
 
 #content{
 	width: 100%;
@@ -67,6 +72,8 @@
 	filter: brightness(0.7);
 }
 
+
+/*技能框ui样式*/
 .skill{
 	margin-top: 10%;
 	font-size: 1.4em;
@@ -76,7 +83,7 @@
 	border: solid 3px black;
 	border-radius: 10px 10px;
 }
-.skill:active{
+.skill_checked{
 	-webkit-filter: brightness(0.7);
 	filter: brightness(0.7);
 }
@@ -90,6 +97,17 @@
 	background: blue;
 }
 
+.dragon{
+	background: #000066;
+}
+.wrestle{
+	background: #996600;
+}
+.electricity{
+	background: #fff100;
+	color: black;
+}
+
 #skill_message{
 	height: 220px;
 	margin-top: 10%;
@@ -100,6 +118,85 @@
 	border-radius: 10px 10px;
 
 }
+#battle_btn{
+	margin-top: 5%;
+	margin-bottom: 5%;
+	padding-bottom: 3%;
+	border: 3px solid #ebac15;
+	border-radius:5px 5px;
+	background: red;
+	text-align: center;
+	color: #d1c0a5;
+}
+#battle_btn:active{
+	-webkit-filter: brightness(0.7);
+	filter: brightness(0.7);
+}
+
+/*用户用精灵的ui样式*/
+/*精灵*/
+#img_user{
+	width: 40%;
+	position: absolute;
+	bottom: 20%;
+}
+/*精灵hp ui*/
+#user_pm_ui{
+	height: 20%;
+	width: 40%;
+	position: absolute;
+	left: 50%;
+	top: 40%;
+	background: #d1c0a5;
+	border: 5px solid #362e2b;
+	border-radius:10px 10px;
+}
+.pm_hp{
+	position: absolute;
+	bottom: 45%;
+	left: 63%;
+	font-size: 0.6em;
+}
+.pm_ui_2{
+	position: absolute;
+	bottom: 0;
+}
+.hp_ui{
+	position: absolute;
+	left: 28%;
+	bottom: 20%;
+	width: 70%;
+	height: 40%;
+	background: black;
+	border-radius:10px 10px;
+}
+.hp_inner_bar{
+	position: absolute;
+	left: 2%;
+	top: 10%;
+	width: 95%;
+	height: 80%;
+	background: green;
+	border-radius:10px 10px;
+}
+/*ai用精灵ui的样式*/
+#img_ai{
+	position: absolute;
+	left: 70%;
+}
+#user_pm_ai{
+	height: 20%;
+	width: 40%;
+	position: absolute;
+	left: 10%;
+	top: 7%;
+	background: #d1c0a5;
+	border: 5px solid #362e2b;
+	border-radius:10px 10px;
+}
+
+
+
 #charts_box{
 	width: 100%;
 	height: 100px;

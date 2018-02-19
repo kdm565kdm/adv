@@ -10,6 +10,8 @@ $(document).ready(function(){
     bottom.addClass('floor');
     var switch_game_btn="<img src='/static/images/check.png' class='img-responsive' id='game_btn'>";
     btn.bind('click',adv_text_run);
+    //已经选择的技能的全局对象
+    var checked_skill={"name":"未选择"};
     //adv脚本推进
     function adv_text_run(){
         $.ajax({
@@ -46,10 +48,15 @@ $(document).ready(function(){
         var pokemon_u;
         var skills;
         var skills_box;
+        var pm_img_u;
 
-        content.html('');
+        var pokemon_ai_data;
+        var pokemon_ai;
+
+        //创建用户使用精灵的对象及ui
         pokemon_u=new pokemon_user(pm_obj['name'],parseInt(pm_obj['hp']),parseInt(pm_obj['atk']),parseInt(pm_obj['def']),parseInt(pm_obj['sp']),pm_obj['attr']);
         learn_skills_script(pokemon_u);
+
         skills=pokemon_u.skills;
         bottom.removeClass('floor');
         bottom.addClass("bg_b");
@@ -58,7 +65,57 @@ $(document).ready(function(){
         bottom.append(skills_box);
         p.text('');
         add_attr_to_skills_ui(skills,pokemon_u);
+
+        content.html('');
+        $('#top').removeClass('top');
+        $('#top').addClass('top_battle');
+
+        pm_img_u=get_pm_img_u(pm_obj);
+        content.append(pm_img_u);
+        create_pm_status_ui_u(content,pokemon_u);
+
+
+        //$('#hp_u').css('width','20%');
+        //创建ai用精灵对象参数数据
+        pokemon_ai_data=create_pm_ai_data();
+        //创建ai用pm的ui
+        create_pm_ai_ui(pokemon_ai_data,content);
+        //创建ai用精灵对象
+        pokemon_ai=create_pm_ai_obj(pokemon_ai_data);
+
+        $('#battle_btn').bind('click',function(){
+            console.log(pokemon_ai);
+            console.log(pokemon_u);
+        });
     }
+
+
+    //获取精灵对象上的精灵图片
+    function get_pm_img_u(pm_obj){
+        var img="<img src='"+pm_obj['src']+"' id='img_user'  class='img-responsive'>";
+        return img;
+    }
+    //创建精灵的ui
+    function create_pm_status_ui_u(div,pm_obj){
+        var div=div;
+        var pm_obj=pm_obj;
+
+        var name=pm_obj['name'];
+        var hp=pm_obj['hp'];
+        var ui='<div id="user_pm_ui">\
+                    <p>&nbsp;&nbsp;<span class="pm_name">'+name+'</span></p>\
+                    <p class="pm_hp">\
+                        <span id="hp_u_num">'+hp+'</span></span>/'+hp+'</span>\
+                    </p>\
+                    <p class="pm_ui_2">&nbsp;&nbsp;HP:</p>\
+                    <div class="hp_ui">\
+                        <div id="hp_u" class="hp_inner_bar"></div>\
+                    </div>\
+                </div>';
+        div.append(ui);
+
+    }
+
 
 
     //技能框生成函数
@@ -73,6 +130,9 @@ $(document).ready(function(){
                                 <div class="col-xs-12 col-sm-12 col-md-12 skill" id="skill4" name="" attr="" harm=0></div>\
                             </div>\
                             <div class="col-xs-6 col-sm-6 col-md-6"><p id="skill_message"><br><br>&nbsp;&nbsp;&nbsp;技能详情面板</p></div>\
+                            <div class="col-xs-12 col-sm-12 col-md-12" id="battle_btn">\
+                                <h1>攻击</h1>\
+                            </div>\
                         </div>';
 
         return skills_box_div;
@@ -81,7 +141,6 @@ $(document).ready(function(){
     //为每一个技能框添加‘技能名’，‘属性’，‘伤害’的html属性，并绑定到用户用的精灵对象上
     function add_attr_to_skills_ui(skills, pm_obj){
         var pm_obj=pm_obj;
-        console.log(pm_obj);
         var skills=skills;
         var skills_div=$('.skill');
         (function(){
@@ -92,25 +151,55 @@ $(document).ready(function(){
                 tem.attr('attr',attr);
                 tem.attr('harm',skills[i]['harm']);
                 tem.html('<p>'+skills[i]['name']+'</p>');
-                if(attr==='火'){
-                    tem.addClass('fire');
-                }else if(attr==='水'){
-                    tem.addClass('water');
-                }else if(attr==='草'){
-                    tem.addClass('plant');
-                }
+                add_attr_class(attr,tem);
                 tem.bind('click',function(){
+                    this.classList.add("skill_checked");
+                    var sib=siblings(this);
+                    sib[0].classList.remove("skill_checked");
+                    sib[1].classList.remove("skill_checked");
+                    sib[2].classList.remove("skill_checked");
+
+                    var name=this.getAttribute('name');
                     var attr=this.getAttribute('attr');
                     var harm=this.getAttribute('harm');
-
-                    $('#skill_message').html('<br>&nbsp;&nbsp;&nbsp;属性：'+attr+'<br><br>'+'&nbsp;&nbsp;&nbsp;伤害：'+harm)
-                })
+                    checked_skill['name']=name;
+                    checked_skill['attr']=attr;
+                    checked_skill['harm']=harm;
+                    console.log(checked_skill);
+                    $('#skill_message').html('<br>&nbsp;&nbsp;&nbsp;属性：'+attr+'<br><br>'+'&nbsp;&nbsp;&nbsp;伤害：'+harm);
+                });
 
             }
         })();
     }
 
-
+    //原生js的获取同胞节点的函数
+    function siblings(elm) {
+        var a = [];
+        var p = elm.parentNode.children;
+        for(var i =0,pl= p.length;i<pl;i++) {
+        if(p[i] !== elm) a.push(p[i]);
+        }
+        return a;
+    }
+    // 根据属性为技能对象的div添加对应的class来改变div的背景色
+    function add_attr_class(attr,tem){
+        var attr=attr;
+        var tem=tem;
+        if(attr==='火'){
+            tem.addClass('fire');
+        }else if(attr==='水'){
+            tem.addClass('water');
+        }else if(attr==='草'){
+            tem.addClass('plant');
+        }else if(attr==='龙'){
+            tem.addClass('dragon');
+        }else if (attr==='格斗') {
+            tem.addClass('wrestle');
+        }else if(attr==='电'){
+            tem.addClass('electricity');
+        }
+    }
 
 
     //以下为精灵对象代码
@@ -183,6 +272,84 @@ $(document).ready(function(){
     };
 
 
+    function create_pm_ai_data(){
+        var pm_ai_datas={
+            1:{
+                "name":"水箭龟",
+                "src":"/static/images/pm/shuijiangui_f.png",
+                "attr":"水",
+                "hp":362,
+                "atk":291,
+                "def":339,
+                "sp":280
+            },
+            2:{
+                "name":"爆炎兽",
+                "src":"/static/images/pm/baoyanshou_f.png",
+                "attr":"火",
+                "hp":360,
+                "atk":348,
+                "def":295,
+                "sp":328
+            },
+            3:{
+                "name":"蜥蜴王",
+                "src":"/static/images/pm/zhenyewang_f.png",
+                "attr":"草",
+                "hp":344,
+                "atk":309,
+                "def":269,
+                "sp":339
+            }
+        };
+        var n=rand(1,4);
+        var pm_obj=pm_ai_datas[n];
+        return pm_obj;
+
+    }
+
+
+    //创建ai用pm的ui的函数
+    function create_pm_ai_ui(pokemon_ai,content){
+        var pm_obj=pokemon_ai;
+        var img="<img src='"+pm_obj['src']+"' id='img_ai'  class='img-responsive'>";
+        var name=pm_obj['name'];
+        var hp=pm_obj['hp'];
+        var ui='<div id="user_pm_ai">\
+                    <p>&nbsp;&nbsp;<span class="pm_name">'+name+'</span></p>\
+                    <p class="pm_hp">\
+                        <span id="hp_ai_num">'+hp+'</span>\
+                        </span>/'+hp+'</span>\
+                    </p>\
+                    <p class="pm_ui_2">&nbsp;&nbsp;HP:</p>\
+                    <div class="hp_ui">\
+                        <div id="hp_ai" class="hp_inner_bar"></div>\
+                    </div>\
+                </div>';
+        content.append(img);
+        content.append(ui);
+    }
+
+
+    //实例化ai精灵对象函数
+    function create_pm_ai_obj(pokemon_ai_data){
+        var pokemon_ai_data=pokemon_ai_data;
+
+        var pm_obj;
+
+        var name=pokemon_ai_data['name'];
+        var attr=pokemon_ai_data['attr'];
+        var hp=pokemon_ai_data['hp'];
+        var atk=pokemon_ai_data['atk'];
+        var def=pokemon_ai_data['def'];
+        var sp=pokemon_ai_data['sp'];
+
+        pm_obj=new pokemon_ai(name,hp,atk,def,sp,attr);
+        learn_skills_script(pm_obj);
+        return pm_obj;
+    }
+
+
     //ai精灵对象（继承自精灵对象）
     function pokemon_ai(name,hp,atk,def,speed,attr){
         pokemon.call(this,name,hp,atk,def,speed,attr);
@@ -226,6 +393,30 @@ $(document).ready(function(){
             
         }   
     };
+
+    //取随机数函数
+    function rand(start, end){
+        return Math.floor(Math.random() * (end - start) + start);
+    }
+    //最高伤害的招式
+    function best_skill_ai(skills, enemy){
+        var best=0;
+        var skills=skills;
+        var enemy=enemy;
+        var harm=attr_weakness_calculate(skills[best],enemy,skills[best].harm);
+        (function(){
+            for(var i=0, len=skills.length; i<len; i++){
+                var tem=attr_weakness_calculate(skills[i],enemy,skills[i].harm);
+                if(tem>harm){
+                    harm=tem;
+                    best=i;
+                }
+            }
+        })();
+        return best;
+    }
+
+
 
     //玩家用精灵对象（继承自精灵对象）
     function pokemon_user(name,hp,atk,def,speed,attr){
@@ -291,26 +482,7 @@ $(document).ready(function(){
         return dam;
     }
 
-    // function rand(start, end){
-    //     return Math.floor(Math.random() * (end - start) + start);
-    // }
-    //最高伤害的招式
-    function best_skill_ai(skills, enemy){
-        var best=0;
-        var skills=skills;
-        var enemy=enemy;
-        var harm=attr_weakness_calculate(skills[best],enemy,skills[best].harm);
-        (function(){
-            for(var i=0, len=skills.length; i<len; i++){
-                var tem=attr_weakness_calculate(skills[i],enemy,skills[i].harm);
-                if(tem>harm){
-                    harm=tem;
-                    best=i;
-                }
-            }
-        })();
-        return best;
-    }
+
 
     //技能列表
     var skills={
