@@ -1,6 +1,6 @@
 $(document).ready(function(){
     //脚本的页数，记得完成后改为0
-    var page=14;
+    var page=0;
     //对话框
     var p=$('#charts_text');
     //adv脚本推进按钮
@@ -95,7 +95,7 @@ $(document).ready(function(){
         create_pm_ai_ui(pokemon_ai_data,content);
         //创建ai用精灵对象
         pokemon_ai=create_pm_ai_obj(pokemon_ai_data);
-
+        p.text('战斗时请等待血条计算完成后再进行下一步的操作否则会出bug');
         $('#battle_btn').bind('click',function(){
             battle_compute(pokemon_u,checked_skill,pokemon_ai);
         });
@@ -527,6 +527,8 @@ $(document).ready(function(){
             dam=Math.floor(dam/2);
         }else if(me_attr==="草"&&ene_attr==="水"){
             dam=dam*2;
+        }else{
+            return dam;
         }
 
         return dam;
@@ -551,23 +553,31 @@ $(document).ready(function(){
                 razorLeaf:{name:"飞叶快刀",attr:"草",harm:55},
                 leafBlade:{name:"叶刃",attr:"草",harm:90},
                 leafStorm:{name:"飞叶风暴",attr:"草",harm:130},
+                //格斗属性招式
+                seismicToss:{name:"地球上投",attr:"格斗",harm:100},
+                auraSphere:{name:"波导弹",attr:"格斗",harm:80},
+                //龙属性招式
+                dragonClaw:{name:"龙爪",attr:"龙",harm:80},
+                dracoMeteor:{name:"流星群",attr:"龙",harm:140},
+                //电属性招式
+                thunderbolt:{name:"十万伏特",attr:"电",harm:90}
                 };
 
     function learn_skills_script(obj){
         var pm=obj;
         if(pm['name']==='爆炎兽'){
             pm.learn_skill(skills.flameThrower);
-            pm.learn_skill(skills.spark);
+            pm.learn_skill(skills.seismicToss);
             pm.learn_skill(skills.fireFist);
-            pm.learn_skill(skills.fireTeeth);
+            pm.learn_skill(skills.dragonClaw);
         }else if(pm['name']==='水箭龟'){
-            pm.learn_skill(skills.waterGun);
+            pm.learn_skill(skills.thunderbolt);
             pm.learn_skill(skills.surf);
-            pm.learn_skill(skills.bubble);
+            pm.learn_skill(skills.auraSphere);
             pm.learn_skill(skills.waterCannon);           
         }else if(pm['name']==='蜥蜴王'){
-            pm.learn_skill(skills.vineWhip);
-            pm.learn_skill(skills.razorLeaf);
+            pm.learn_skill(skills.auraSphere);
+            pm.learn_skill(skills.dragonClaw);
             pm.learn_skill(skills.leafBlade);
             pm.learn_skill(skills.leafStorm);            
         }
@@ -688,14 +698,10 @@ $(document).ready(function(){
         var rest=rest;
 
         var origin=origin;
-        var tem=100-((origin-hp)/origin).toFixed(2)*100;
+        var tem=parseInt(100-((origin-hp)/origin).toFixed(2)*100);
         var par;
         
-        if(25<=tem<=60){
-            $('#hp_u').css('background','#f19149');
-        }else if(tem<25){
-            $('#hp_u').css('background','#7d0000');
-        }
+
 
         if(hp===rest){
             hp_u_num.text(hp);
@@ -721,14 +727,14 @@ $(document).ready(function(){
 
         var origin=origin;
 
-        var tem=100-((origin-hp)/origin).toFixed(2)*100;
+        var tem=parseInt(100-((origin-hp)/origin).toFixed(2)*100);
         var par;
 
-        if(25<=tem<=60){
-            $('#hp_u').css('background','#f19149');
-        }else if(tem<25){
-            $('#hp_u').css('background','#7d0000');
-        }
+        // if(25<=tem<=60){
+        //     $('#hp_u').css('background','#f19149');
+        // }else if(tem<25){
+        //     $('#hp_u').css('background','#7d0000');
+        // }
 
         if(hp===rest){
             hp_u_num.text(hp);
