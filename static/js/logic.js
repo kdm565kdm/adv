@@ -142,7 +142,7 @@ $(document).ready(function(){
                                 <div class="col-xs-12 col-sm-12 col-md-12 skill" id="skill4" name="" attr="" harm=0></div>\
                             </div>\
                             <div class="col-xs-6 col-sm-6 col-md-6"><p id="skill_message"><br><br>&nbsp;&nbsp;&nbsp;技能详情面板</p></div>\
-                            <div class="col-xs-12 col-sm-12 col-md-12" id="battle_btn">\
+                            <div class="col-xs-6 col-sm-6 col-md-6" id="battle_btn">\
                                 <h1>攻击</h1>\
                             </div>\
                         </div>';
@@ -547,7 +547,7 @@ $(document).ready(function(){
                 waterGun:{name:"水枪",attr:"水",harm:40},
                 surf:{name:"冲浪",attr:"水",harm:90},
                 bubble:{name:"泡沫光线",attr:"水",harm:65},
-                waterCannon:{name:"水之加农炮",attr:"水",harm:110},
+                waterCannon:{name:"水加农",attr:"水",harm:110},
                 //草属性招式
                 vineWhip:{name:"藤鞭",attr:"草",harm:45},
                 razorLeaf:{name:"飞叶快刀",attr:"草",harm:55},
@@ -571,7 +571,7 @@ $(document).ready(function(){
             pm.learn_skill(skills.fireFist);
             pm.learn_skill(skills.dragonClaw);
         }else if(pm['name']==='水箭龟'){
-            pm.learn_skill(skills.thunderbolt);
+            pm.learn_skill(skills.dragonClaw);
             pm.learn_skill(skills.surf);
             pm.learn_skill(skills.auraSphere);
             pm.learn_skill(skills.waterCannon);           
