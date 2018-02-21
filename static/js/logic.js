@@ -12,6 +12,11 @@ $(document).ready(function(){
     btn.bind('click',adv_text_run);
     //已经选择的技能的全局对象
     var checked_skill={"name":"未选择"};
+
+    var battle_messages={
+        mes:"",
+        result:""
+    };
     //adv脚本推进
     function adv_text_run(){
         $.ajax({
@@ -22,10 +27,8 @@ $(document).ready(function(){
                 dataType:'json',
                 success:function(data){
                     var gal_txt=data['gal_txt'];
-                    p.fadeOut("fast",function(){
-                        p.text(gal_txt["text"]);
-                        p.fadeIn("fast");
-                    });
+                    text_switch(gal_txt["text"]);
+
                     if(gal_txt.hasOwnProperty('eval')){
                         eval(gal_txt["eval"]);
                     }
@@ -42,6 +45,17 @@ $(document).ready(function(){
             }
         );
     }
+
+    //文本框中的文字切换函数
+    function text_switch(text){
+        var text=text;
+        p.fadeOut("fast",function(){
+            p.text(text);
+            p.fadeIn("fast");
+        });
+    }
+
+
     //载入战斗界面
     function load_battle(select_pm){
         var pm_obj=select_pm;
@@ -54,7 +68,7 @@ $(document).ready(function(){
         var pokemon_ai;
 
         //创建用户使用精灵的对象及ui
-        pokemon_u=new pokemon_user(pm_obj['name'],parseInt(pm_obj['hp']),parseInt(pm_obj['atk']),parseInt(pm_obj['def']),parseInt(pm_obj['sp']),pm_obj['attr']);
+        pokemon_u=new pokemon_user(pm_obj['name'],parseInt(pm_obj['hp']),parseInt(pm_obj['hp']),parseInt(pm_obj['atk']),parseInt(pm_obj['def']),parseInt(pm_obj['sp']),pm_obj['attr']);
         learn_skills_script(pokemon_u);
 
         skills=pokemon_u.skills;
@@ -75,7 +89,6 @@ $(document).ready(function(){
         create_pm_status_ui_u(content,pokemon_u);
 
 
-        //$('#hp_u').css('width','20%');
         //创建ai用精灵对象参数数据
         pokemon_ai_data=create_pm_ai_data();
         //创建ai用pm的ui
@@ -84,8 +97,7 @@ $(document).ready(function(){
         pokemon_ai=create_pm_ai_obj(pokemon_ai_data);
 
         $('#battle_btn').bind('click',function(){
-            console.log(pokemon_ai);
-            console.log(pokemon_u);
+            battle_compute(pokemon_u,checked_skill,pokemon_ai);
         });
     }
 
@@ -165,7 +177,6 @@ $(document).ready(function(){
                     checked_skill['name']=name;
                     checked_skill['attr']=attr;
                     checked_skill['harm']=harm;
-                    console.log(checked_skill);
                     $('#skill_message').html('<br>&nbsp;&nbsp;&nbsp;属性：'+attr+'<br><br>'+'&nbsp;&nbsp;&nbsp;伤害：'+harm);
                 });
 
@@ -204,9 +215,10 @@ $(document).ready(function(){
 
     //以下为精灵对象代码
     //精灵对象
-    function pokemon(name,hp,atk,def,speed,attr){
+    function pokemon(name,hp,shp,atk,def,speed,attr){
         this.name=name;
         this.hp=hp;
+        this.shp=shp;
         this.atk=atk;
         this.def=def;
         this.sp=speed;
@@ -224,7 +236,8 @@ $(document).ready(function(){
                 var res_harm;
                 var boom;
                 var ene_rest;
-                console.log(this.name+"使用"+skill.name+"攻击了"+ene.name);
+                var tem=this.name+"使用"+skill.name+"攻击了"+ene.name+'，';
+                battle_messages['mes']=tem;
 
                 skill_harm=attr_weakness_calculate(skill,ene,skill_harm);
                 damage=attr_weakness_calculate(this,ene,damage);
@@ -234,41 +247,49 @@ $(document).ready(function(){
                 }
                 boom=res_harm/ene.hp*10;
                 if(boom>=5){
-                    console.log("效果拔群！");
+                    battle_messages['mes']+="效果拔群！";
                 }else if(boom<=3){
-                    console.log("效果不是很好");
+                    battle_messages['mes']+="效果不是很好";
                 }
-                console.log(ene.name+"受到了"+res_harm+"点伤害");
+                p.text();
+                p.text(battle_messages['mes']);
+                battle_messages['mes']="";
+                //console.log(ene.name+"受到了"+res_harm+"点伤害");
                 ene_rest=ene.be_attacked(res_harm);
                 if(ene_rest===0){
-                    console.log(this.name+"获得了胜利！！！");
+                    tem=this.name+"获得了胜利！！！";
+                    battle_messages['result']+=tem;
                 }
                 
             }
         },
         be_attacked:function(damage){
-            console.log(this.name+"的原本hp是"+this.hp);
+            //console.log(this.name+"的原本hp是"+this.hp);
             var harm=damage-this.def;
+            var tem=this.hp;
             if(harm<=0){
                 harm=10;
             }
-            this.hp=this.hp-harm;
-            if (this.hp<0) {
-                this.hp=0;
+            tem=tem-harm;
+            if (tem<0) {
+                tem=0;
             };
-            console.log(this.name+"的剩余hp是"+this.hp+"\n\n");
+            //console.log(this.name+"的剩余hp是"+tem+"\n\n");
+            this.hp_ui(tem);
             this.is_active();
             return this.hp;
         },
         is_active:function(){
             if(this.hp===0){
                 this.live=false;
-                console.log(this.name+"倒下了");
+                var tem=this.name+"倒下了，"
+                battle_messages['result']+=tem;
             }
         },
         learn_skill:function(ability){
             this.skills.push(ability);
-        }
+        },
+        hp_ui:function(){}
     };
 
 
@@ -319,7 +340,7 @@ $(document).ready(function(){
                     <p>&nbsp;&nbsp;<span class="pm_name">'+name+'</span></p>\
                     <p class="pm_hp">\
                         <span id="hp_ai_num">'+hp+'</span>\
-                        </span>/'+hp+'</span>\
+                        </span>/'+'<span id="hp_ai_num_origin">'+hp+'</span>'+'</span>\
                     </p>\
                     <p class="pm_ui_2">&nbsp;&nbsp;HP:</p>\
                     <div class="hp_ui">\
@@ -344,15 +365,15 @@ $(document).ready(function(){
         var def=pokemon_ai_data['def'];
         var sp=pokemon_ai_data['sp'];
 
-        pm_obj=new pokemon_ai(name,hp,atk,def,sp,attr);
+        pm_obj=new pokemon_ai(name,hp,hp,atk,def,sp,attr);
         learn_skills_script(pm_obj);
         return pm_obj;
     }
 
 
     //ai精灵对象（继承自精灵对象）
-    function pokemon_ai(name,hp,atk,def,speed,attr){
-        pokemon.call(this,name,hp,atk,def,speed,attr);
+    function pokemon_ai(name,hp,shp,atk,def,speed,attr){
+        pokemon.call(this,name,hp,shp,atk,def,speed,attr);
     }
     pokemon_ai.prototype=new pokemon();
     pokemon_ai.prototype.constructor=pokemon_ai;
@@ -371,28 +392,44 @@ $(document).ready(function(){
             var res_harm;
             var boom;
             var ene_rest;
-            console.log(this.name+"使用"+selected_skill.name+"攻击了"+ene.name);
+
+            var tem=this.name+"使用"+selected_skill.name+"攻击了"+ene.name+'，';
+            battle_messages['mes']+=tem;
 
             skill_harm=attr_weakness_calculate(selected_skill,ene,skill_harm);
             damage=attr_weakness_calculate(this,ene,damage);
-            res_harm=skill_harm+damage-ene.def;
+            res_harm=parseInt(skill_harm)+parseInt(damage)-ene.def;
             if(res_harm<=0){
                 res_harm=10;
             }
             boom=res_harm/ene.hp*10;
             if(boom>=5){
-                console.log("效果拔群！");
+                battle_messages['mes']+="效果拔群！@";
             }else if(boom<=3){
-                console.log("效果不是很好");
+                battle_messages['mes']+="但效果不是很好。@";
+            }else{
+                battle_messages['mes']+="但效果一般。@";
             }
-            console.log(ene.name+"受到了"+res_harm+"点伤害");
+            //console.log(ene.name+"受到了"+res_harm+"点伤害");
+
             ene_rest=ene.be_attacked(res_harm);
             if(ene_rest===0){
-                console.log(this.name+"获得了胜利！！！");
+                tem=this.name+"获得了胜利！！！"
+                battle_messages['result']+=tem;
             }
+
             
         }   
     };
+
+    pokemon_ai.prototype.hp_ui=function(rest){
+        var hp_num=this.hp;
+        var rest=rest;
+        var origin=this.shp;
+        $('#bottom').fadeOut();
+        ai_hp_minus(hp_num,rest,origin);
+        this.hp=rest;
+    }
 
     //取随机数函数
     function rand(start, end){
@@ -419,8 +456,8 @@ $(document).ready(function(){
 
 
     //玩家用精灵对象（继承自精灵对象）
-    function pokemon_user(name,hp,atk,def,speed,attr){
-        pokemon.call(this,name,hp,atk,def,speed,attr);
+    function pokemon_user(name,hp,shp,atk,def,speed,attr){
+        pokemon.call(this,name,hp,shp,atk,def,speed,attr);
     }
     pokemon_user.prototype=new pokemon();
     pokemon_user.prototype.constructor=pokemon_user;
@@ -432,29 +469,42 @@ $(document).ready(function(){
                 var res_harm;
                 var boom;
                 var ene_rest;
-                console.log(this.name+"使用"+skill.name+"攻击了"+ene.name);
+                var tem=this.name+"使用"+skill.name+"攻击了"+ene.name+'，';
+                battle_messages['mes']+=tem;
 
                 skill_harm=attr_weakness_calculate(skill,ene,skill_harm);
                 damage=attr_weakness_calculate(this,ene,damage);
-                res_harm=skill_harm+damage-ene.def;
+                res_harm=parseInt(skill_harm)+parseInt(damage)-ene.def;
                 if(res_harm<=0){
                     res_harm=10;
                 }
                 boom=res_harm/ene.hp*10;
                 if(boom>=5){
-                    console.log("效果拔群！");
+                    battle_messages['mes']+="效果拔群！@";
                 }else if(boom<=3){
-                    console.log("效果不是很好");
+                    battle_messages['mes']+="但效果不是很好。@";
+                }else{
+                    battle_messages['mes']+="但效果一般。@";
                 }
-                console.log(ene.name+"受到了"+res_harm+"点伤害");
+                //console.log(ene.name+"受到了"+res_harm+"点伤害");
                 ene_rest=ene.be_attacked(res_harm);
+
+
                 if(ene_rest===0){
-                    console.log(this.name+"获得了胜利！！！");
+                    tem=this.name+"获得了胜利！！！"
+                    battle_messages['result']+=tem;
                 }
                 
             }
     };
-
+    pokemon_user.prototype.hp_ui=function(rest){
+        var hp_num=this.hp;
+        var rest=rest;
+        var origin=this.shp;
+        $('#bottom').fadeOut();
+        user_hp_minus(hp_num,rest,origin);
+        this.hp=rest;
+    }
 
 
     //属性相克函数
@@ -522,4 +572,174 @@ $(document).ready(function(){
             pm.learn_skill(skills.leafStorm);            
         }
     }
+
+    //战斗计算函数
+    function battle_compute(pokemon_u,checked_skill,pokemon_ai){
+        var pm_user=pokemon_u;
+        var user_skill=checked_skill;
+        // var pm_user_shp=pm_user.shp;
+        // console.log(pm_user_shp);
+        var pm_ai=pokemon_ai;
+
+        var tem_text;
+        // $('#skills_box').fadeOut();
+        // ai_hp_minus(pm_ai.hp,250,pm_ai.shp);
+        if(pm_user.sp>=pm_ai.sp){
+            $('#img_ai').fadeOut().fadeIn(function(){
+                $('#img_user').fadeOut().fadeIn();
+            });
+
+            pm_user.attack(pm_ai,user_skill);
+            pm_ai.attack(pm_user);
+
+        }else{
+            $('#img_user').fadeOut().fadeIn(function(){
+                $('#img_ai').fadeOut().fadeIn();
+            });
+
+            pm_ai.attack(pm_user);
+            pm_user.attack(pm_ai,user_skill);
+        }
+
+
+        var tem_text=battle_messages['mes'].split("@");
+
+        p.fadeOut(function(){
+            p.text('');
+            p.text(tem_text[0]);
+        }).fadeIn().fadeOut(function(){
+
+            p.text(tem_text[0]+tem_text[1]);
+        }).fadeIn();
+
+
+        battle_messages['mes']='';
+        if(battle_messages['result']!==""){
+            var tem_text=battle_messages['result'];
+            p.fadeOut(function(){
+                p.text('');
+                p.text(tem_text);
+                $('#skills_box').empty();
+                create_ui_battle_end();
+            }).fadeIn();
+            battle_messages['result']='';
+
+        }
+
+    }
+
+
+    function create_ui_battle_end(){
+        var div='<div id="battle_end_box">\
+                            <button type="button" class="btn btn-warning btn-lg btn-block" id="restart">\
+                                从头开始\
+                            </button>\
+                            <button type="button" class="btn btn-success btn-lg btn-block" id="repeat">\
+                                再来一局\
+                            </button>\
+                </div>';
+        var tem;
+
+        $('#skills_box').append(div);
+        $('#restart').bind('click',function(){
+            page=0;
+
+            $('#content').empty();
+
+            $('#bottom').empty();
+            tem='<img src="/static/images/ball.png" class="img-responsive" id="ball_btn">';
+            
+            $('#top').removeClass('top_battle');
+            $('#top').addClass('top');
+
+            $('#bottom').removeClass('bg_b');
+            $('#bottom').addClass('floor');
+
+            $('#bottom').append(tem);
+            $('#ball_btn').bind('click',adv_text_run);
+
+            adv_text_run();
+        });
+        $('#repeat').bind('click',function(){
+            page=14;
+
+            $('#content').empty();
+
+            $('#bottom').empty();
+            $('#bottom').removeClass('bg_b');
+            $('#bottom').addClass('floor');
+
+            $('#top').removeClass('top_battle');
+            $('#top').addClass('top');
+
+            adv_text_run();
+        });
+    }
+
 });
+
+
+    //hp减少动画函数 用户
+    function user_hp_minus(hp_num,rest,origin){
+        var hp_u_num=$('#hp_u_num');
+        var hp_u_ui=$('#hp_u');
+
+        var hp=hp_num;
+        var rest=rest;
+
+        var origin=origin;
+        var tem=100-((origin-hp)/origin).toFixed(2)*100;
+        var par;
+        
+        if(25<=tem<=60){
+            $('#hp_u').css('background','#f19149');
+        }else if(tem<25){
+            $('#hp_u').css('background','#7d0000');
+        }
+
+        if(hp===rest){
+            hp_u_num.text(hp);
+            $('#bottom').fadeIn();
+            return 1;
+        }
+
+        hp_u_num.text(hp);
+        hp_u_ui.css('width',tem.toString()+'%');
+
+        hp=hp-1;
+        par='user_hp_minus('+hp.toString()+','+rest+','+origin+')';
+        setTimeout(par,50);
+    }
+
+    //hp减少动画函数 ai
+    function ai_hp_minus(hp_num,rest,origin){
+        var hp_u_num=$('#hp_ai_num');
+        var hp_u_ui=$('#hp_ai');
+
+        var hp=hp_num;
+        var rest=rest;
+
+        var origin=origin;
+
+        var tem=100-((origin-hp)/origin).toFixed(2)*100;
+        var par;
+
+        if(25<=tem<=60){
+            $('#hp_u').css('background','#f19149');
+        }else if(tem<25){
+            $('#hp_u').css('background','#7d0000');
+        }
+
+        if(hp===rest){
+            hp_u_num.text(hp);
+
+            return 1;
+        }
+
+        hp_u_num.text(hp);
+        hp_u_ui.css('width',tem.toString()+'%');
+
+        hp=hp-1;
+        par='ai_hp_minus('+hp.toString()+','+rest+','+origin+')';
+        setTimeout(par,50);
+    }

@@ -133,6 +133,18 @@
 	filter: brightness(0.7);
 }
 
+
+/*战斗结束后的底部div样式*/
+#battle_end_box{
+	height: 300px;
+}
+
+#restart{
+	margin-top: 20%;
+}
+#repeat{
+	margin-top: 20%;
+}
 /*用户用精灵的ui样式*/
 /*精灵*/
 #img_user{
@@ -167,18 +179,19 @@
 	bottom: 20%;
 	width: 70%;
 	height: 40%;
+	padding-right: 2%;
+	padding-left: 2%;
 	background: black;
 	border-radius:10px 10px;
 }
 .hp_inner_bar{
-	position: absolute;
-	left: 2%;
-	top: 10%;
-	width: 95%;
+	width: 100%;
 	height: 80%;
+	margin-top: 2%;
 	background: green;
 	border-radius:10px 10px;
 }
+
 /*ai用精灵ui的样式*/
 #img_ai{
 	position: absolute;
